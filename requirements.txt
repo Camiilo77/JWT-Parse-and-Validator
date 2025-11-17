@@ -1,13 +1,6 @@
-# requirements.txt
-python-dotenv>=1.0.0   # Si quieres usar variables de entorno (opcional)
-pytest>=7.0.0          # Para pruebas unitarias (opcional)
-# Las siguientes ya vienen en la librería estándar de Python, NO necesitas instalar:
-# re
-# base64
-# json
-# time
-
-# Si quieres integrar validación de firma JWT real:
-PyJWT>=2.6.0   # (opcional, solo si vas a verificar firmas)
-
-
+flask==2.3.3
+flask-cors==4.0.0
+pymongo==4.5.0
+cryptography==41.0.7
+gunicorn==21.2.0
+python-dotenv==1.0.0

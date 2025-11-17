@@ -8,13 +8,13 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia el resto del código fuente del proyecto
+# Copia el codigo fuente del proyecto
 COPY . .
 
-# Expon el puerto usado (ajustar si usas la API Flask, por ejemplo 5000)
+# puerto 5000
 EXPOSE 5000
 
 # Comando de ejecución por defecto (puede ser main.py o app.py)
 CMD ["python", "main.py"]
-# Si usas la API Flask/FastAPI activa, puedes cambiar por:
-# CMD ["python", "app.py"]
+
+

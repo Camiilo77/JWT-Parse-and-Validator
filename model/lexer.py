@@ -1,10 +1,16 @@
 from .automata import Base64URLDFA
 
 class JWTLexer:
-    def tokenize(self, jwt_string):
+    """
+    Lexer para descomponer el JWT en sus partes léxicas y validar cada una con DFA.
+    """
+    def tokenize(self, jwt_string: str):
+        """
+        Retorna lista de tokens léxicos si el JWT es correcto, lanza excepción si no lo es.
+        """
         parts = jwt_string.split('.')
         if len(parts) != 3:
-            raise ValueError("JWT malformado")
+            raise ValueError("JWT malformado: no tiene 3 partes")
         dfa = Base64URLDFA()
         for part in parts:
             if not dfa.process(part):

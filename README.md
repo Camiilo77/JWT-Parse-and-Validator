@@ -14,3 +14,8 @@ Una herramienta ligera de código abierto para analizar y validar tokens web JSO
 ## Estructura de módulos:
 - model/ : Código de automatas, lexer, parser, semántico, codificación y firma
 - tests/ : JWTs de prueba
+
+## 👨‍💻 Créditos
+
+**Desarrollado por:**  
+[Camilo Rodriguez - Sebastian Vega], para el proyecto final de Lenguajes Formales — Universidad Pedagógica y Tecnológica de Colombia

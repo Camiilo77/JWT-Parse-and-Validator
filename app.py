@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from model.parser import JWTParser
+from model.lexer import JWTlexer
 from model.semantic import JWTSemanticAnalyzer
 from model.automata import JWTStructureDFA
-from model.crypto import JWTCrypto
+from model.crypto import JWTVerifier
 from model.utils import show_tree
+
 
 app = Flask(__name__)
 CORS(app)  # Permite peticiones desde el frontend (localhost:3000)
@@ -23,7 +25,9 @@ def analyze_jwt():
         result['estructura_valida'] = dfa.process(jwt_string)
 
         # 2. Parsing y decodificación de header/payload
-        parser = JWTParser()
+        lexer = JWTlexer()
+        parser = JWTParser(lexer)
+
         components = parser.parse(jwt_string)
         header = parser.decode_base64url(components['HEADER'])
         payload = parser.decode_base64url(components['PAYLOAD'])
@@ -47,7 +51,7 @@ def analyze_jwt():
         # 5. Firma según algoritmo
         alg = header.get('alg', 'HS256') if isinstance(header, dict) else 'HS256'
         if secret and alg in ["HS256", "HS384"]:
-            result['firma_valida'] = JWTCrypto.verify_signature(jwt_string, secret, alg)
+            result['firma_valida'] = JWTVerifier.verify_signature(jwt_string, secret, alg)
         elif secret and alg not in ["HS256", "HS384"]:
             result['firma_valida'] = f"Algoritmo '{alg}' no soportado para verificación local"
         else:

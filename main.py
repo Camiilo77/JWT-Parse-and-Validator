@@ -3,10 +3,12 @@ from model.semantic import JWTSemanticAnalyzer
 from model.automata import JWTStructureDFA
 from model.utils import show_tree
 from tests import test_cases
+from model.lexer import JWTlexer
 
 def run(jwt_string, label=""):
     try:
-        parser = JWTParser()
+        lexer = JWTlexer()
+        parser = JWTParser(lexer)
         semantic = JWTSemanticAnalyzer()
         dfa = JWTStructureDFA()
         print(f"{label}Estructura válida?:", dfa.process(jwt_string))

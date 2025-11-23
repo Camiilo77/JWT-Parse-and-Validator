@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const pretty = obj =>
   typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2);
@@ -20,6 +20,35 @@ function App() {
   const [jwtGen, setJwtGen] = useState('');
   const [errorGen, setErrorGen] = useState('');
   const [loadingGen, setLoadingGen] = useState(false);
+
+  // --- Estado para historial
+  const [history, setHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState('');
+
+  // --- Función para cargar historial
+  const fetchHistory = async () => {
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      const response = await fetch('http://localhost:5000/api/history');
+      const data = await response.json();
+      if (response.ok) {
+        setHistory(data);
+      } else {
+        setHistoryError(data.error || 'Error al cargar el historial');
+      }
+    } catch (e) {
+      setHistoryError('No se pudo conectar con el backend para cargar el historial.');
+    } finally {
+      setHistoryLoading(false);
+    }
+  }; // End of fetchHistory function
+
+  useEffect(() => {
+    fetchHistory();
+  }, []); // Empty dependency array means this runs once on mount
+
 
   // --- Función de análisis
   const analyzeJWT = async () => {
@@ -255,6 +284,71 @@ function App() {
 )}
 
       </section>
+
+      {/* ----- Sección Historial ----- */}
+      <section style={{marginTop: 38}}>
+        <h2 style={{marginBottom: 12, color: "#313cff"}}>Historial de Análisis de JWT</h2>
+        {historyLoading && <p>Cargando historial...</p>}
+        {historyError && <div style={{ color: "#ba0034", marginTop: 12, fontWeight: 600, fontSize: "16px" }}>{historyError}</div>}
+        {history.length === 0 && !historyLoading && !historyError && <p>No hay historial de análisis aún.</p>}
+        {history.length > 0 && (
+          <div style={{ maxHeight: "400px", overflowY: "auto", border: "1px solid #eee", borderRadius: 8, padding: 10 }}>
+            {history.map((record, index) => (
+              <div key={record._id} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: "1px solid #eee" }}>
+                <h3 style={{ fontSize: "18px", color: "#555", marginBottom: 10 }}>
+                  Análisis #{history.length - index} - {new Date(record.timestamp).toLocaleString()}
+                </h3>
+                <div style={{ marginBottom: 5 }}>
+                  <strong>JWT Analizado:</strong> <pre style={{ wordBreak: "break-all", whiteSpace: "pre-wrap" }}>{record.jwt_string}</pre>
+                </div>
+                <div style={{ marginBottom: 5 }}>
+                  <strong>Estructura Válida:</strong>{" "}
+                  {record.analysis_result.estructura_valida ? "Sí" : "No"}
+                </div>
+                <div style={{ marginBottom: 5 }}>
+                  <strong>Header:</strong> <pre>{pretty(record.analysis_result.header)}</pre>
+                </div>
+                <div style={{ marginBottom: 5 }}>
+                  <strong>Payload:</strong> <pre>{pretty(record.analysis_result.payload)}</pre>
+                </div>
+                <div style={{ marginBottom: 5 }}>
+                  <strong>Errores Semánticos:</strong>{" "}
+                  {record.analysis_result.errores.length > 0 ? (
+                    <ul>
+                      {record.analysis_result.errores.map((err, i) => (
+                        <li key={i}>{err}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    "Ninguno"
+                  )}
+                </div>
+                <div style={{ marginBottom: 5 }}>
+                  <strong>Advertencias:</strong>{" "}
+                  {record.analysis_result.warnings.length > 0 ? (
+                    <ul>
+                      {record.analysis_result.warnings.map((warn, i) => (
+                        <li key={i}>{warn}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    "Ninguna"
+                  )}
+                </div>
+                <div style={{ marginBottom: 5 }}>
+                  <strong>Firma Válida:</strong>{" "}
+                  {typeof record.analysis_result.firma_valida !== "undefined"
+                    ? (record.analysis_result.firma_valida === true
+                      ? "Válida"
+                      : (record.analysis_result.firma_valida === false ? "Inválida" : record.analysis_result.firma_valida))
+                    : "No verificada"}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
       <div style={{marginTop:38, fontSize:"14px", color:"#777"}}>
         <b>Pautas validadas:</b> Estructura, decodificación Base64URL, parsing JSON, visualización de claims, validación semántica, firma HS256/HS384, generación y manejo de errores.
       </div>

@@ -6,6 +6,7 @@ from model.semantic import JWTSemanticAnalyzer
 from model.automata import JWTStructureDFA
 from model.crypto import JWTVerifier
 from model.utils import show_tree
+from model.db import init_db, save_result, get_history
 
 
 app = Flask(__name__)
@@ -57,6 +58,7 @@ def analyze_jwt():
         else:
             result['firma_valida'] = "Sin clave para verificar"
 
+        save_result(jwt_string, result)
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 400
@@ -76,5 +78,12 @@ def generate_jwt_api():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
+# -------- Historial de análisis de JWT --------
+@app.route('/api/history', methods=['GET'])
+def get_analysis_history():
+    history = get_history()
+    return jsonify(history)
+
 if __name__ == "__main__":
+    init_db()
     app.run(host='0.0.0.0', port=5000)
